@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static GameManager;
 
 public class MainManager : MonoBehaviour
 {
@@ -12,20 +13,19 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public Text HiscoreText;
     private bool m_Started = false;
     private int m_Points;
-    
     private bool m_GameOver = false;
+    public bool newHighscore = false;
 
-    
     // Start is called before the first frame update
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -36,6 +36,7 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        HiscoreText.text = $"Top Score: {topScore.Name} {topScore.Score.ToString()}";
     }
 
     private void Update()
@@ -57,7 +58,7 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -66,11 +67,24 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (!newHighscore)
+        {
+            HiscoreText.text = $"Top Score: {topScore.Name} {topScore.Score}";
+            if (topScore.Score < m_Points)
+            {
+                newHighscore = true;
+            }
+        }
+        if (newHighscore)
+        {
+            HiscoreText.text = $"Top Score: {playerName} {m_Points}";
+        }
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        GameManager.instance.AddHighScore(m_Points);
     }
 }
